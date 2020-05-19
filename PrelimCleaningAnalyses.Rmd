@@ -9,7 +9,7 @@ Outline:
 
 Data Cleaning:
 0. Load in the data and necessary packages
-1. Clean the data, eliminating those that died. 
+1. Clean the data 
 2. Calculate necessary parameters (development time in days not dates, ln(mass))
 3. Get data into long format for making cumulative growth curve graphs
 
@@ -19,5 +19,126 @@ Growth Analyses:
 6. Plot mass and development time at wandering raw data, to map onto Geoff and I's study predictions
 
 Wasp Analyses:
-7. Run models for wasp survival to eclosion with diet and wetness as fixed effects, and ID within bin as random effects
+7. Run models for wasp survival to eclosion with diet, number of times parasitized, and wetness as fixed effects, and ID within bin as random effects
 8. Graph boxplots for eclosion percentage across diet type 
+
+# Data Cleaning
+
+## 0. Load in the data and necessary packages
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lme4)
+library(lubridate)
+library(tidyr)
+```
+
+```{r}
+data <- read.csv("~/Desktop/MsCcSurvMay19.csv", header = TRUE)
+```
+
+## 1. Clean the data
+
+### Eliminate those that died:
+
+```{r}
+data <- data[data$survived == "yes", ]
+```
+
+### Checking sample sizes
+
+```{r}
+count(data[data$food == "DC" & data$para == "yes", ])
+count(data[data$food == "DC" & data$para == "no", ])
+count(data[data$food == "TB" & data$para == "yes", ])
+count(data[data$food == "TB" & data$para == "no", ])
+count(data[data$food == "diet" & data$para == "yes", ])
+count(data[data$food == "diet" & data$para == "no", ])
+```
+
+## 2. Calculate necessary parameters
+
+### Convert dates to experiment days 
+
+```{r}
+# Internal process of the loop to convert days to dates
+expt_day <- function(start.date, date){
+  date <- mdy(date)
+  start <- mdy(start.date)
+  diff <- yday(date) - yday(start)
+
+  return(diff)
+}
+
+# Code for the loop itself
+loop <- function(start.date, date.list){
+  days <- rep(NA, length(date.list))
+  for (i in 1:(length(days))){
+    days[i] <- expt_day(start.date = start.date, date = date.list[i])
+  }
+  return(days)
+}
+
+# Run the loop for the various dates listed
+
+data$day.hatch <- loop(start.date = "04/21/2020", date.list = data$date.hatch)
+data$day.3rd <- loop(start.date = "04/21/2020", date.list = data$date.3rd)
+data$day.para <- loop(start.date = "04/21/2020", date.list = data$date.para)
+data$day.4th <- loop(start.date = "04/21/2020", date.list = data$date.4th)
+data$day.5th <- loop(start.date = "04/21/2020", date.list = data$date.5th)
+data$day.w <- loop(start.date = "04/21/2020", date.list = data$date.w)
+data$day.eclos <- loop(start.date = "04/21/2020", date.list = data$date.eclos)
+data$day.coc <- loop(start.date = "04/21/2020", date.list = data$date.coc)
+data$day.remove <- loop(start.date = "04/21/2020", date.list = data$date.remove)
+data$day.w.eclos <- loop(start.date = "04/21/2020", date.list = data$date.w.eclos)
+
+```
+
+### Calculate development times
+
+```{r}
+# Time til each instar
+data$tth <- 0
+data$tt3 <- data$day.3rd - data$day.hatch
+data$tt4 <- data$day.4th - data$day.hatch
+data$tt5 <- data$day.5th - data$day.hatch
+data$ttw <- data$day.w - data$day.hatch
+data$ttcoc <- data$day.coc - data$day.hatch
+data$ttweclos <- data$day.w.eclos - data$day.hatch
+
+# Time spent in each instar
+data$delta3 <- data$day.4th - data$day.3rd
+data$delta4 <- data$day.5th - data$day.4th
+data$delta5 <- data$day.w - data$day.5th
+
+```
+
+### Convert masses to ln(mass)
+
+```{r}
+data$lnh <- log(data$mass.hatch)
+data$ln3 <- log(data$mass.3rd)
+data$ln4 <- log(data$mass.4th)
+data$ln5 <- log(data$mass.5th)
+data$lnw <- log(data$mass.w)
+```
+
+## 3. Convert to long format for graphing
+
+```{r}
+masslong <- data %>% gather(instar, mass, lnh, ln3, ln4, ln5, lnw)
+masslong$instar <- gsub("ln", "", masslong$instar)
+
+agelong <- data %>% gather(instar, age, tth, tt3, tt4, tt5, ttw)
+agelong$instar <- gsub("tt", "", agelong$instar)
+
+masslong <- masslong %>% select(ID, food, para, instar, mass)
+agelong <- agelong %>% select(ID, food, para, instar, age)
+
+datalong<-merge(masslong, agelong, by=c("ID", "food", "para", "instar"))
+
+```
+
+# 
+
