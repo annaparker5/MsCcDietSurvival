@@ -28,10 +28,12 @@ Wasp Analyses:
 
 ```{r}
 library(ggplot2)
+library(plyr)
 library(dplyr)
 library(lme4)
 library(lubridate)
 library(tidyr)
+library(Rmisc)
 ```
 
 ```{r}
@@ -126,6 +128,8 @@ data$lnw <- log(data$mass.w)
 
 ## 3. Convert to long format for graphing
 
+### Converting to long format
+
 ```{r}
 masslong <- data %>% gather(instar, mass, lnh, ln3, ln4, ln5, lnw)
 masslong$instar <- gsub("ln", "", masslong$instar)
@@ -140,5 +144,130 @@ datalong<-merge(masslong, agelong, by=c("ID", "food", "para", "instar"))
 
 ```
 
-# 
+### Finding means (not separated by para status) 
+
+```{r}
+#calculate means and variation
+
+#constructing summarySE for age and mass to make mean plot
+
+masssum <- summarySE(datalong, measurevar = "mass",
+                  groupvars = c("food", "instar"),
+                  na.rm=TRUE)
+
+agesum <- summarySE(datalong, measurevar = "age",
+                   groupvars = c("food", "instar"),
+                   na.rm = TRUE)
+
+#combine into one data frame
+
+means <- masssum
+
+means$age <- agesum[, 4]
+means$age.se <- agesum[, 6]
+means$age.ci <- agesum[, 7]
+
+```
+
+### Finding means (separated by para status) 
+
+```{r}
+#calculate means and variation
+
+#constructing summarySE for age and mass to make mean plot
+
+pmasssum <- summarySE(datalong, measurevar = "mass",
+                  groupvars = c("food", "para", "instar"),
+                  na.rm=TRUE)
+
+pagesum <- summarySE(datalong, measurevar = "age",
+                   groupvars = c("food", "para", "instar"),
+                   na.rm = TRUE)
+
+#combine into one data frame
+
+pmeans <- pmasssum
+
+pmeans$age <- pagesum[, 5]
+pmeans$age.se <- pagesum[, 7]
+pmeans$age.ci <- pagesum[, 8]
+
+```
+
+# Growth Analyses:
+
+## 4. Run models for mass gain and development time with diet as a fixed effect, and ID within bin as random effects
+
+
+## 5. Graph growth curves (ln-transformed) for total development
+
+### Combined with CIs
+
+```{r}
+
+meanplot <- ggplot(means, aes(x = age, y = mass, group = food, color = food)) + 
+  geom_point(size = 3) + 
+  geom_line(size = 1.2) + 
+  geom_errorbar(aes(ymin = mass-(ci/2), ymax = mass + (ci/2)),
+                width = .3, size = 1) + 
+  geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
+                 height = .3, size = 1) + 
+  scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
+
+
+ggsave("MsCcSurvMay19.png", width = 8, height = 5)
+
+meanplot
+
+
+```
+
+
+
+### Separated para and non-para
+
+```{r}
+
+pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) + 
+  geom_point(size = 3) + 
+  geom_line(size = 1.2) + 
+  geom_errorbar(aes(ymin = mass-(ci/2), ymax = mass + (ci/2)),
+                width = .3, size = 1) + 
+  geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
+                 height = .3, size = 1) + 
+  scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  scale_shape_manual(values = c(1, 19)) + 
+  labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
+
+
+ggsave("MsCcSurvParaMay19.png", width = 8, height = 5)
+
+pmeanplot
+
+
+```
+
+
+
+
+## 6. Plot mass and development time at wandering raw data, to map onto Geoff and I's study predictions
+
+```{r}
+raw <- ggplot(data, aes(x = ttw, y = mass.w, color = food)) + 
+  geom_point(alpha = 0.8) + 
+  scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  labs(x = "Age at wandering (days)", y = "Mass at wandering (mg)")
+
+ggsave("MsCcSurvRawMay19.png")
+
+raw
+```
+
 
