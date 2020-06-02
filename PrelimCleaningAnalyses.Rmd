@@ -14,7 +14,7 @@ Data Cleaning:
 3. Get data into long format for making cumulative growth curve graphs
 
 Growth Analyses:
-4. Run models for mass gain and development time with diet as a fixed effect, and ID within bin as random effects
+4. Run models for mass gain and development time with diet and parasitization status as fixed effects, and ID within bin as random effects
 5. Graph growth curves (ln-transformed) for total development
 6. Plot mass and development time at wandering raw data, to map onto Geoff and I's study predictions
 
@@ -47,6 +47,21 @@ data <- read.csv("~/Desktop/MsCcSurvMay19.csv", header = TRUE)
 ```{r}
 data <- data[data$survived == "yes", ]
 ```
+
+### Eliminate failed parasitizations:
+
+```{r}
+
+data %>%
+  filter((data$para == "yes" & data$mass.w != "NA"))
+
+data <- data[data$ID != 34, ]
+data <- data[data$ID != 36, ]
+data <- data[data$ID != 102, ]
+data <- data[data$ID != 124, ]
+
+```
+
 
 ### Checking sample sizes
 
@@ -233,7 +248,7 @@ meanplot
 
 pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) + 
   geom_point(size = 3) + 
-  geom_line(size = 1.2) + 
+  geom_line(size = 1.2, aes(linetype = para)) + 
   geom_errorbar(aes(ymin = mass-(ci/2), ymax = mass + (ci/2)),
                 width = .3, size = 1) + 
   geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
@@ -241,7 +256,7 @@ pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) 
   scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
-  scale_shape_manual(values = c(1, 19)) + 
+  scale_shape_manual(values = c(2, 19)) + 
   labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
 
 
