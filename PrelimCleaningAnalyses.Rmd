@@ -229,6 +229,14 @@ summary(mw1)
 
 ```
 
+```{r}
+mw2 <- lmer(mass.w ~ food + (1|bin), data = data[data$para == "no" & data$food != "diet", ])
+
+summary(mw2)
+
+```
+
+
 ### Time til wandering
 
 ```{r}
@@ -241,20 +249,22 @@ summary(tw1)
 ### Mass at 5th instar
 
 ```{r}
-m51 <- lmer(mass.5th ~ food*para + (1|bin), data = data)
+m51 <- lmer(mass.5th ~ food + para + (1|bin), data = data)
 
-summary(m51)
+anova(m51)
 ```
 
+No interactions between para + food type (food*para)
 
 ### Time til 5th instar
 
 ```{r}
-t51 <- lmer(day.5th ~ food*para + (1|bin), data = data)
+t51 <- lmer(day.5th ~ food + para + (1|bin), data = data)
 
-summary(t51)
+anova(t51)
 ```
 
+Also no food*para here 
 
 ## 5. Graph growth curves (ln-transformed) for total development
 
@@ -299,7 +309,9 @@ pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) 
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   scale_shape_manual(values = c(2, 19)) + 
-  labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
+  labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)") + 
+  xlim(0, 17) + 
+  ylim(0, 8.5)
 
 
 ggsave("MsCcSurvParaJun2.png", width = 8, height = 5)
@@ -309,7 +321,7 @@ pmeanplot
 
 ```
 
-
+Bigger effect on diet than on either host plant
 
 
 ## 6. Plot mass and development time at wandering raw data, to map onto Geoff and I's study predictions
@@ -337,7 +349,7 @@ te1 <- lmer(day.coc ~ food + (1|bin), data = data[data$para == "yes", ])
 summary(te1)
 ```
 
-### Number of wasps emerged
+### Number of cocoons
 
 ```{r}
 we1 <- lmer(num.w.coc ~ food + (1|bin), data = data[data$para == "yes", ])
