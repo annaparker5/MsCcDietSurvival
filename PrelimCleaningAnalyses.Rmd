@@ -233,7 +233,7 @@ data$bin <- gsub("0", "", data$bin)
 ### Checking relationship between day massed and weight
 
 ```{r}
-ggplot(aes(x = day.mass.pupa, y = mass.pupa, color = food), data = data[data$para == "no", ]) + 
+ggplot(aes(x = (day.mass.pupa - day.pupa), y = mass.pupa, color = food), data = data[data$para == "no", ]) + 
   geom_jitter(alpha = 0.8, width = 0.2) +  
   scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
                      name="Food Type",
@@ -241,7 +241,17 @@ ggplot(aes(x = day.mass.pupa, y = mass.pupa, color = food), data = data[data$par
   
 ```
 
-No obvious relationship - I don't think we need to account for it in our model. 
+No obvious relationship - I don't think we need to account for it in our model. Let's run a model to make sure though:
+
+```{r}
+data$for.check <- data$day.mass.pupa - data$day.pupa
+
+check1 <- lmer(mass.pupa ~ for.check + (1|bin), data = data[data$para == "no", ])
+
+anova(check1)
+```
+
+Great! No relationship. 
 
 ### Mass at pupation 
 
@@ -252,6 +262,16 @@ anova(mp1)
 
 ```
 
+Food is highly significant - sex is not. Let's plot this:
+
+```{r}
+ggplot(aes(x = food, y = mass.pupa), data = data[data$para == "no", ]) + 
+  geom_boxplot() + 
+  labs(x = "Diet Type", y = "Mass of pupa (mg)")
+  
+```
+
+
 ### Mass at wandering 
 
 ```{r}
@@ -261,6 +281,15 @@ summary(mw1)
 anova(mw1)
 
 ```
+
+```{r}
+ggplot(aes(x = food, y = mass.w), data = data[data$para == "no", ]) + 
+  geom_boxplot() + 
+  labs(x = "Diet Type", y = "Mass at wandering (mg)")
+  
+```
+
+Compared to the pupation data, this means that DC bugs lost more mass during pupation than the other two groups, and TB lost more than those on diet. Very interesting! 
 
 ```{r}
 mw2 <- lmer(mass.w ~ food + (1|bin), data = data[data$para == "no" & data$food != "diet", ])
