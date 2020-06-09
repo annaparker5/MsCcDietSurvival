@@ -142,6 +142,14 @@ data$ln5 <- log(data$mass.5th)
 data$lnw <- log(data$mass.w)
 ```
 
+### Calculate total number of wasps emerged and percent wasps that spun cocoons
+
+```{r}
+data$num.w.tot <- data$num.w.coc + data$num.w.larvae
+data$perc.w.coc <- data$num.w.coc / data$num.w.tot
+```
+
+
 ## 3. Convert to long format for graphing
 
 ### Converting to long format
@@ -226,6 +234,7 @@ data$bin <- gsub("0", "", data$bin)
 mw1 <- lmer(mass.w ~ food + (1|bin), data = data[data$para == "no", ])
 
 summary(mw1)
+anova(mw1)
 
 ```
 
@@ -233,18 +242,22 @@ summary(mw1)
 mw2 <- lmer(mass.w ~ food + (1|bin), data = data[data$para == "no" & data$food != "diet", ])
 
 summary(mw2)
+anova(mw2)
 
 ```
 
+No interaction of diet overall
 
 ### Time til wandering
 
 ```{r}
 tw1 <- lmer(day.w ~ food + (1|bin), data = data[data$para == "no", ])
 
-summary(tw1)
+anova(tw1)
 
 ```
+
+No effect of diet overall
 
 ### Mass at 5th instar
 
@@ -279,13 +292,13 @@ meanplot <- ggplot(means, aes(x = age, y = mass, group = food, color = food)) +
                 width = .3, size = 1) + 
   geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
                  height = .3, size = 1) + 
-  scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
+  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
 
 
-ggsave("MsCcSurvJun2.png", width = 8, height = 5)
+ggsave("MsCcSurvJun9.png", width = 8, height = 5)
 
 meanplot
 
@@ -305,16 +318,16 @@ pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) 
                 width = .3, size = 1) + 
   geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
                  height = .3, size = 1) + 
-  scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
+  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
-  scale_shape_manual(values = c(2, 19)) + 
+  scale_shape_manual(values = c(19, 2)) + 
   labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)") + 
-  xlim(0, 17) + 
-  ylim(0, 8.5)
+  xlim(5, 17) + 
+  ylim(3, 8.5)
 
 
-ggsave("MsCcSurvParaJun2.png", width = 8, height = 5)
+ggsave("MsCcSurvParaJun9.png", width = 8, height = 5)
 
 pmeanplot
 
@@ -328,13 +341,13 @@ Bigger effect on diet than on either host plant
 
 ```{r}
 raw <- ggplot(data, aes(x = ttw, y = mass.w, color = food)) + 
-  geom_point(alpha = 0.8) + 
-  scale_color_manual(values=c("#95D840", "#1F9F88", "#3F87BC"),
+  geom_point(alpha = 0.8, position = "jitter") + 
+  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   labs(x = "Age at wandering (days)", y = "Mass at wandering (mg)")
 
-ggsave("MsCcSurvRawJun2.png")
+ggsave("MsCcSurvRawJun9.png", width = 8, height = 5)
 
 raw
 ```
@@ -346,17 +359,58 @@ raw
 ```{r}
 te1 <- lmer(day.coc ~ food + (1|bin), data = data[data$para == "yes", ])
 
-summary(te1)
+anova(te1)
 ```
 
-### Number of cocoons
+No effect on day of emergence (but it's singular?)
+
+### Number of wasps emerged
 
 ```{r}
-we1 <- lmer(num.w.coc ~ food + (1|bin), data = data[data$para == "yes", ])
+we1 <- lmer(num.w.tot ~ food + (1|bin), data = data[data$para == "yes", ])
 
-summary(we1)
+anova(we1)
 
 ```
 
+```{r}
+we2 <- lmer(num.w.tot ~ food + num.para + (1|bin), data = data[data$para == "yes", ])
+
+anova(we2)
+```
+
+No effect on number of wasps emerged
+
+### Percent wasps that were cocoons
+
+```{r}
+per1 <- lmer(perc.w.coc ~ food + (1|bin), data = data[data$para == "yes", ])
+
+anova(per1)
+```
+
+```{r}
+per2 <- lmer(perc.w.coc ~ food + num.para + (1|bin), data = data[data$para == "yes", ])
+
+anova(per2)
+```
+
+No effect of diet on percent that were cocoons, but strong effect of number of parasitizations
+
+Graph of that below:
+
+```{r}
+ggplot(aes(x = num.para, y = perc.w.coc, color = food), data = data[data$para == "yes", ]) + 
+  geom_jitter(width = 0.1, alpha = 0.8) + 
+    scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  labs(x = "Number of parasitizations", y = "Percentage of wasp larvae emerged that spun cocoons")
+
+```
+
+Without that one outlier in the 2 parasitizations group, I think this relationship would look a lot different. 
 
 ### Percent wasps eclosed
+
+### Sex ratio of wasps eclosed
