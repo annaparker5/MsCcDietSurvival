@@ -315,7 +315,7 @@ No effect of diet overall
 ### Mass at 5th instar
 
 ```{r}
-m51 <- lmer(mass.5th ~ food + para + (1|bin), data = data)
+m51 <- lmer(mass.5th ~ food + para +food:para + (1|bin), data = data)
 
 anova(m51)
 ```
@@ -325,12 +325,19 @@ No interactions between para + food type (food*para)
 ### Time til 5th instar
 
 ```{r}
-t51 <- lmer(day.5th ~ food + para + (1|bin), data = data)
+t51 <- lmer(day.5th ~ food + para + food:para + (1|bin), data = data)
 
 anova(t51)
+
+t52 <- lmer(day.5th ~ para + (1|bin), data = data)
+
+anova(t51, t52)
 ```
 
 Also no food*para here 
+
+Can't partition out effects of food vs food:para 
+Marginal whether full model is significantly better
 
 ## 5. Graph growth curves (ln-transformed) for total development
 
@@ -427,10 +434,18 @@ anova(we1)
 ```
 
 ```{r}
-we2 <- lmer(num.w.tot ~ food + num.para + (1|bin), data = data[data$para == "yes", ])
+we2 <- lmer(num.w.tot ~ food + num.para +food:num.para + (1|bin), data = data[data$para == "yes" & data$num.para != 3, ])
 
 anova(we2)
 ```
+
+```{r}
+data$num.para <- as.factor(data$num.para)
+
+ggplot(aes(x = num.para, y = num.w.tot), data = data[data$para == "yes", ]) + 
+  geom_boxplot()
+```
+
 
 No effect on number of wasps emerged
 
