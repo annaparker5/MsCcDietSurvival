@@ -299,7 +299,45 @@ anova(mw2)
 
 ```
 
-No interaction of diet overall
+No interaction of diet overall - is an effect when you remove the diet category
+
+### Calculating mass lost
+
+```{r}
+data$mass.lost.pupa <- data$mass.w - data$mass.pupa
+```
+
+Look at average values:
+
+```{r}
+tbml <- data[data$food == "TB" & data$para == "no", ]
+dcml <- data[data$food == "DC" & data$para == "no" & data$ID != 29, ]
+dietml <- data[data$food == "diet" & data$para == "no", ]
+
+mean(tbml$mass.lost.pupa)
+mean(dcml$mass.lost.pupa)
+mean(dietml$mass.lost.pupa)
+```
+
+
+Model real quick:
+
+```{r}
+ml1 <- lmer(mass.lost.pupa ~ food + (1|bin), data = data)
+
+summary(ml1)
+
+anova(ml1)
+
+```
+
+```{r}
+ggplot(aes(x = food, y = mass.lost.pupa), data = data[data$para == "no", ]) + 
+  geom_boxplot() + 
+  labs(x = "Diet Type", y = "Mass lost during transition to pupa (mg)")
+```
+
+Diet is significant. 
 
 ### Time til wandering
 
@@ -358,7 +396,7 @@ meanplot <- ggplot(means, aes(x = age, y = mass, group = food, color = food)) +
   labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
 
 
-ggsave("MsCcSurvJun9.png", width = 8, height = 5)
+ggsave("MsCcSurvJun16.png", width = 8, height = 5)
 
 meanplot
 
@@ -387,7 +425,7 @@ pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) 
   ylim(3, 8.5)
 
 
-ggsave("MsCcSurvParaJun9.png", width = 8, height = 5)
+ggsave("MsCcSurvParaJun16.png", width = 8, height = 5)
 
 pmeanplot
 
@@ -407,7 +445,7 @@ raw <- ggplot(data, aes(x = ttw, y = mass.w, color = food)) +
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   labs(x = "Age at wandering (days)", y = "Mass at wandering (mg)")
 
-ggsave("MsCcSurvRawJun9.png", width = 8, height = 5)
+ggsave("MsCcSurvRawJun16.png", width = 8, height = 5)
 
 raw
 ```
@@ -440,6 +478,14 @@ anova(we2)
 ```
 
 ```{r}
+we3 <- lmer(num.w.tot ~ food + num.para + food:num.para + (1|bin), data = data[data$para == "yes" & data$num.para != 2, ])
+
+anova(we3)
+```
+
+
+
+```{r}
 data$num.para <- as.factor(data$num.para)
 
 ggplot(aes(x = num.para, y = num.w.tot), data = data[data$para == "yes", ]) + 
@@ -457,13 +503,15 @@ per1 <- lmer(perc.w.coc ~ food + (1|bin), data = data[data$para == "yes", ])
 anova(per1)
 ```
 
+No effect of food. 
+
 ```{r}
-per2 <- lmer(perc.w.coc ~ food + num.para + (1|bin), data = data[data$para == "yes", ])
+per2 <- lmer(perc.w.coc ~ food + num.para + food:num.para + (1|bin), data = data[data$para == "yes", ])
 
 anova(per2)
 ```
 
-No effect of diet on percent that were cocoons, but strong effect of number of parasitizations
+No effect of diet on percent that were cocoons, but strong effect of number of parasitizations (goes away when you add the interaction term). 
 
 Graph of that below:
 
@@ -477,7 +525,17 @@ ggplot(aes(x = num.para, y = perc.w.coc, color = food), data = data[data$para ==
 
 ```
 
-Without that one outlier in the 2 parasitizations group, I think this relationship would look a lot different. 
+Without that one outlier in the 2 parasitizations group, I think this relationship would look a lot different.
+
+
+```{r}
+per3 <- lmer(perc.w.coc ~ food + num.para + food:num.para + (1|bin), 
+            data = data[data$para == "yes" & data$num.para != 2, ])
+
+anova(per3)
+```
+
+Now there's a significant effect of food and number of parasitizations. 
 
 ### Percent wasps eclosed
 
