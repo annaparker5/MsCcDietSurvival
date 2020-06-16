@@ -323,7 +323,7 @@ mean(dietml$mass.lost.pupa)
 Model real quick:
 
 ```{r}
-ml1 <- lmer(mass.lost.pupa ~ food + (1|bin), data = data)
+ml1 <- lmer(mass.lost.pupa ~ food + sex + food:sex + (1|bin), data = data[data$para == "no", ])
 
 summary(ml1)
 
@@ -337,7 +337,7 @@ ggplot(aes(x = food, y = mass.lost.pupa), data = data[data$para == "no", ]) +
   labs(x = "Diet Type", y = "Mass lost during transition to pupa (mg)")
 ```
 
-Diet is significant. 
+Diet is significant, not sex. 
 
 ### Time til wandering
 
