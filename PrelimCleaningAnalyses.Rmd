@@ -235,7 +235,7 @@ data$bin <- gsub("0", "", data$bin)
 ```{r}
 ggplot(aes(x = (day.mass.pupa - day.pupa), y = mass.pupa, color = food), data = data[data$para == "no", ]) + 
   geom_jitter(alpha = 0.8, width = 0.2) +  
-  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco"))
   
@@ -352,7 +352,7 @@ meanplot <- ggplot(means, aes(x = age, y = mass, group = food, color = food)) +
                 width = .3, size = 1) + 
   geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
                  height = .3, size = 1) + 
-  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   labs(x = "Total developmental age (days)", y = "Total mass gained ln(mg)")
@@ -378,7 +378,7 @@ pmeanplot <- ggplot(pmeans, aes(x = age, y = mass, color = food, shape = para)) 
                 width = .3, size = 1) + 
   geom_errorbarh(aes(xmin = age - (age.ci/2), xmax = age + (age.ci/2)),
                  height = .3, size = 1) + 
-  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   scale_shape_manual(values = c(19, 2)) + 
@@ -402,7 +402,7 @@ Bigger effect on diet than on either host plant
 ```{r}
 raw <- ggplot(data, aes(x = ttw, y = mass.w, color = food)) + 
   geom_point(alpha = 0.8, position = "jitter") + 
-  scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   labs(x = "Age at wandering (days)", y = "Mass at wandering (mg)")
@@ -470,7 +470,7 @@ Graph of that below:
 ```{r}
 ggplot(aes(x = num.para, y = perc.w.coc, color = food), data = data[data$para == "yes", ]) + 
   geom_jitter(width = 0.1, alpha = 0.8) + 
-    scale_color_manual(values=c("#95D840", "#59CCC3", "#3F87BC"),
+    scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
                      name="Food Type",
                      label=c("Devil's Claw", "Diet", "Tobacco")) + 
   labs(x = "Number of parasitizations", y = "Percentage of wasp larvae emerged that spun cocoons")
