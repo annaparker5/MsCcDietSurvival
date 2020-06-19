@@ -35,6 +35,7 @@ library(lubridate)
 library(tidyr)
 library(Rmisc)
 library(lmerTest)
+library(nlme)
 ```
 
 ```{r}
@@ -495,25 +496,33 @@ ggplot(aes(x = num.para, y = num.w.tot), data = data[data$para == "yes", ]) +
 
 No effect on number of wasps emerged
 
-### Percent wasps that were cocoons
+### Percent wasps that were cocoons - do this as a binomial! 
+
+1. Get the data in binomial form 
+2. Run the models 
 
 ```{r}
-per1 <- lmer(perc.w.coc ~ food + (1|bin), data = data[data$para == "yes", ])
+binom <- data[data$para == "yes", ] %>%
+  select(ID, food, bin, num.para, num.w.coc, num.w.larvae, perc.w.coc)
 
-anova(per1)
 ```
-
-No effect of food. 
 
 ```{r}
-per2 <- lmer(perc.w.coc ~ food + num.para + food:num.para + (1|bin), data = data[data$para == "yes", ])
+bin1 <- glmer(cbind(num.w.coc, num.w.larvae) ~ food + num.para + food:num.para + (1|bin), 
+            data = binom, family = "binomial")
 
-anova(per2)
+summary(bin1)
+
+anova(bin1)
 ```
 
-No effect of diet on percent that were cocoons, but strong effect of number of parasitizations (goes away when you add the interaction term). 
+```{r}
+ggplot(aes(x = food, y = perc.w.coc), data = binom) + 
+  geom_boxplot()
+```
 
-Graph of that below:
+
+Graph of # parasitizations below:
 
 ```{r}
 ggplot(aes(x = num.para, y = perc.w.coc, color = food), data = data[data$para == "yes", ]) + 
@@ -526,16 +535,6 @@ ggplot(aes(x = num.para, y = perc.w.coc, color = food), data = data[data$para ==
 ```
 
 Without that one outlier in the 2 parasitizations group, I think this relationship would look a lot different.
-
-
-```{r}
-per3 <- lmer(perc.w.coc ~ food + num.para + food:num.para + (1|bin), 
-            data = data[data$para == "yes" & data$num.para != 2, ])
-
-anova(per3)
-```
-
-Now there's a significant effect of food and number of parasitizations. 
 
 ### Percent wasps eclosed
 
