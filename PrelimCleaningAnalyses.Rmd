@@ -13,6 +13,9 @@ Data Cleaning:
 2. Calculate necessary parameters (development time in days not dates, ln(mass))
 3. Get data into long format for making cumulative growth curve graphs
 
+Survival Analyses: 
+How many caterpillars survived the experiment? Just parasitized individuals. 
+
 Growth Analyses:
 4. Run models for mass gain and development time with diet and parasitization status as fixed effects, and bin as a random effect
 5. Graph growth curves (ln-transformed) for total development
@@ -39,7 +42,7 @@ library(nlme)
 ```
 
 ```{r}
-data <- read.csv("~/Desktop/MsCcSurvJun9.csv", header = TRUE)
+data <- read.csv("~/Desktop/MsCcSurvJun22.csv", header = TRUE)
 ```
 
 ## 1. Clean the data
@@ -125,13 +128,16 @@ data$tt3 <- data$day.3rd - data$day.hatch
 data$tt4 <- data$day.4th - data$day.hatch
 data$tt5 <- data$day.5th - data$day.hatch
 data$ttw <- data$day.w - data$day.hatch
+data$ttp <- data$day.pupa - data$day.hatch
+data$tte <- data$day.eclos - data$day.hatch
 data$ttcoc <- data$day.coc - data$day.hatch
 data$ttweclos <- data$day.w.eclos - data$day.hatch
 
-# Time spent in each instar
+# Time spent in each instar/stage
 data$delta3 <- data$day.4th - data$day.3rd
 data$delta4 <- data$day.5th - data$day.4th
 data$delta5 <- data$day.w - data$day.5th
+data$deltap <- data$day.eclos - data$day.pupa
 
 ```
 
@@ -221,6 +227,42 @@ pmeans$age.ci <- pagesum[, 8]
 
 ```
 
+# Survival Analyses:
+
+## How many caterpillars survived parasitization?
+
+```{r}
+## Reload for those that didn't survive also 
+
+survdata <- read.csv("~/Desktop/MsCcSurvJun22.csv", header = TRUE)
+survdata$bin <- gsub("0", "", survdata$bin)
+survdata$survived <- gsub("yes", "1", survdata$survived)
+survdata$survived <- gsub("no", "0", survdata$survived)
+survdata$survived <- as.factor(survdata$survived)
+
+surv1 <- glmer(survived ~ food + (1|bin), 
+            data = survdata[survdata$para == "yes", ], family = "binomial")
+
+summary(surv1)
+```
+
+```{r}
+surv2 <- glmer(survived ~ food + para + (1|bin), 
+            data = survdata, family = "binomial")
+
+summary(surv2)
+
+#anova(surv2)
+```
+
+```{r}
+surv3 <- glmer(survived ~ food + para + food:para + (1|bin), 
+            data = survdata, family = "binomial")
+
+summary(surv3)
+```
+
+
 # Growth Analyses:
 
 ## 4. Run models for mass gain and development time with diet as a fixed effect, and bin as a random effect
@@ -254,6 +296,20 @@ anova(check1)
 
 Great! No relationship. 
 
+### Mass at eclosion
+
+```{r}
+me1 <- lmer(mass.eclos ~ food + sex + food:sex + (1|bin), data = data[data$para == "no",])
+
+anova(me1)
+```
+
+```{r}
+ggplot(aes(x = food, y = mass.eclos), data = data) + 
+  geom_boxplot()
+```
+
+
 ### Mass at pupation 
 
 ```{r}
@@ -278,7 +334,6 @@ ggplot(aes(x = food, y = mass.pupa), data = data[data$para == "no", ]) +
 ```{r}
 mw1 <- lmer(mass.w ~ food + (1|bin), data = data[data$para == "no", ])
 
-summary(mw1)
 anova(mw1)
 
 ```
@@ -326,7 +381,7 @@ Model real quick:
 ```{r}
 ml1 <- lmer(mass.lost.pupa ~ food + sex + food:sex + (1|bin), data = data[data$para == "no", ])
 
-summary(ml1)
+#summary(ml1)
 
 anova(ml1)
 
@@ -367,7 +422,9 @@ No interactions between para + food type (food*para)
 t51 <- lmer(day.5th ~ food + para + food:para + (1|bin), data = data)
 
 anova(t51)
+```
 
+```{r}
 t52 <- lmer(day.5th ~ para + (1|bin), data = data)
 
 anova(t51, t52)
@@ -513,12 +570,31 @@ bin1 <- glmer(cbind(num.w.coc, num.w.larvae) ~ food + num.para + food:num.para +
 
 summary(bin1)
 
-anova(bin1)
+#anova(bin1)
 ```
 
 ```{r}
-ggplot(aes(x = food, y = perc.w.coc), data = binom) + 
-  geom_boxplot()
+bin2 <- glmer(cbind(num.w.coc, num.w.larvae) ~ food + (1|bin), 
+            data = binom, family = "binomial")
+
+summary(bin2)
+```
+
+```{r}
+anova(bin1, bin2)
+```
+
+
+
+```{r}
+binom$num.para <- as.factor(binom$num.para)
+
+ggplot(aes(x = food, y = perc.w.coc, color = num.para), data = binom) + 
+  geom_point(alpha = 0.8, position = position_jitter(width = 0.1)) + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
+                     name="Number of Parasitizations",
+                     label=c("1", "2", "3")) + 
+  labs(x = "Diet Type", y = "Percent of emerged wasps that spun cocoons")
 ```
 
 
