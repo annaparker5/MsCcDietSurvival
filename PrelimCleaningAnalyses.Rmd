@@ -309,6 +309,25 @@ ggplot(aes(x = food, y = mass.eclos), data = data) +
   geom_boxplot()
 ```
 
+### Time as a pupa
+
+```{r}
+tp1 <- lmer(deltap ~ food + sex + food:sex + (1|bin), data = data[data$para == "no", ])
+
+anova(tp1)
+```
+
+```{r}
+data.graph <- data[complete.cases(data$sex), ]
+
+ggplot(aes(x = food, y = deltap, color = sex), data = data[data$para == "no", ]) + 
+  geom_point(alpha = 0.8, position = position_jitter(width = 0.1)) + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
+                     name="Sex",
+                     label=c("NA", "Female", "Male")) + 
+  labs(x = "Diet Type", y = "Time spent as a pupa (days)")
+```
+
 
 ### Mass at pupation 
 
