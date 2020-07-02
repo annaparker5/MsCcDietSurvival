@@ -640,6 +640,21 @@ ggplot(aes(x = num.para, y = perc.w.coc, color = food), data = data[data$para ==
 
 Without that one outlier in the 2 parasitizations group, I think this relationship would look a lot different.
 
+Combined graph:
+
+```{r}
+data$num.para <- as.factor(data$num.para)
+
+ggplot(aes(x = food, y = perc.w.coc, color = num.para, size = num.w.tot), data = data[data$para == "yes", ]) + 
+  geom_jitter(width = 0.15, alpha = 0.5) + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
+                     name="Number of Parasitizations",
+                     label=c("1", "2", "3")) + 
+ 
+  labs(x = "Diet Type", y = "Percentage of wasp larvae emerged that spun cocoons")
+```
+
+
 ### Percent wasps eclosed
 
 ### Sex ratio of wasps eclosed
