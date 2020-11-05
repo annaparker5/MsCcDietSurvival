@@ -104,6 +104,25 @@ Singular when I add in bin - too many degrees of freedom I guess.
 ```{r}
 ggplot(aes(x = num.w.emerg.tot, y = surv.to.eclos, color = food, size = num.para), data = data) + 
   geom_point() + 
-  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"))
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
+  labs(x = "Total number of wasp larvae emerged", y = "Percent survival to adulthood")
 ```
+
+```{r}
+ggplot(aes(x = food, y = perc.eclos), data = data) + 
+  #geom_violin() + 
+  geom_jitter(width = 0.05, alpha = 0.5) + 
+  labs(x = "Diet Type", y = "Percent cocoons that successfully eclosed")
+```
+
+```{r}
+ggplot(aes(x = num.w.emerg.tot, y = mass.5th, color = food), data = data) + 
+  geom_point() + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
+  labs(x = "Total number of wasp larvae emerged", y = "Mass at 5th instar")
+```
+
+I had a lot (17) with emergence during 4th instar - not sure how best to account for those, since I didn't measure final mass... Can I measure final mass while frozen?
+
+
 
