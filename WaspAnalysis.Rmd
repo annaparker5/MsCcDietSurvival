@@ -27,7 +27,7 @@ library(nlme)
 ```
 
 ```{r}
-data <- read.csv("~/Desktop/MsCcSurvNov5.csv", header = TRUE)
+data <- read.csv("~/Desktop/MsCcSurvNov8.csv", header = TRUE)
 ```
 
 
@@ -89,7 +89,7 @@ modint <- lm(surv.to.eclos ~ food*mass.5th, data = data)
 
 summary(modint)
 ```
-When you add in the interaction terms, now everything is significant... 
+When you add in the interaction terms, now TB bugs are differentt than diet and DC bugs... 
 
 ```{r}
 modbin <- lmer(surv.to.eclos ~ food + mass.5th + (1|bin), data = data)
@@ -97,9 +97,35 @@ modbin <- lmer(surv.to.eclos ~ food + mass.5th + (1|bin), data = data)
 summary(modbin)
 ```
 
-Singular when I add in bin - too many degrees of freedom I guess. 
+Singular when I add in bin - too many degrees of freedom I guess.
+
+### Analyzing within a binomial framework
+
+```{r}
+binom1 <- glm(surv.to.eclos ~ food, data = data, family = "binomial", weights = num.w.emerg.tot)
+
+summary(binom1)
+```
+
+Here, diet is popping out as being significantly different than DC and TB
+
+```{r}
+binom2 <- glm(surv.to.eclos ~ food*mass.5th, data = data, family = "binomial", weights = num.w.emerg.tot)
+
+summary(binom2)
+```
+
+Now everything's significant - eek. 
 
 ## 3. Graph! 
+
+```{r}
+ggplot(aes(x = num.w.emerg.tot, y = surv.to.eclos, color = food), data = data) + 
+  geom_point() + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
+  labs(x = "Total number of wasp larvae emerged", y = "Percent survival to adulthood")
+```
+
 
 ```{r}
 ggplot(aes(x = num.w.emerg.tot, y = surv.to.eclos, color = food, size = num.para), data = data) + 
@@ -123,6 +149,13 @@ ggplot(aes(x = num.w.emerg.tot, y = mass.5th, color = food), data = data) +
 ```
 
 I had a lot (17) with emergence during 4th instar - not sure how best to account for those, since I didn't measure final mass... Can I measure final mass while frozen?
+
+```{r}
+ggplot(aes(x = surv.to.eclos, y = mass.5th, color = food), data = data) + 
+  geom_point() + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
+  labs(x = "Percent wasps survived to eclosion", y = "Mass at 5th instar")
+```
 
 
 
