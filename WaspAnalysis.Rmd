@@ -105,6 +105,10 @@ Singular when I add in bin - too many degrees of freedom I guess.
 binom1 <- glm(surv.to.eclos ~ food, data = data, family = "binomial", weights = num.w.emerg.tot)
 
 summary(binom1)
+
+binom1nw <- glm(surv.to.eclos ~ food, data = data, family = "binomial")
+
+summary(binom1nw)
 ```
 
 Here, diet is popping out as being significantly different than DC and TB
@@ -117,6 +121,14 @@ summary(binom2)
 
 Now everything's significant - eek. 
 
+```{r}
+food <- lm(mass.5th ~ food, data = data)
+
+anova(food)
+```
+
+
+
 ## 3. Graph! 
 
 ```{r}
@@ -124,6 +136,21 @@ ggplot(aes(x = num.w.emerg.tot, y = surv.to.eclos, color = food), data = data) +
   geom_point() + 
   scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
   labs(x = "Total number of wasp larvae emerged", y = "Percent survival to adulthood")
+```
+
+
+```{r}
+ggplot(aes(x = num.w.emerg.tot, y = num.w.eclos.tot, color = food), data = data) + 
+  geom_point() + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
+  labs(x = "Total number of wasp larvae emerged", y = "Total number of wasp larvae eclosed")
+```
+
+```{r}
+ggplot(aes(x = num.w.emerg.tot, y = num.w.coc, color = food), data = data) + 
+  geom_point() + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54")) + 
+  labs(x = "Total number of wasp larvae emerged", y = "Total number of wasp cocoons")
 ```
 
 
