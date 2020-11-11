@@ -24,7 +24,6 @@ library(tidyr)
 library(Rmisc)
 library(lmerTest)
 library(nlme)
-library(forecats)
 ```
 
 ```{r}
@@ -107,9 +106,9 @@ binom1 <- glm(surv.to.eclos ~ food, data = data, family = "binomial", weights = 
 
 summary(binom1)
 
-binom1nw <- glm(surv.to.eclos ~ food, data = data, family = "binomial")
+#binom1nw <- glm(surv.to.eclos ~ food, data = data, family = "binomial")
 
-summary(binom1nw)
+#summary(binom1nw)
 ```
 
 Here, diet is popping out as being significantly different than DC and TB
@@ -211,3 +210,52 @@ ggplot(aes(x = stage, y = number, color = food), data = meanslong) +
   labs(x = "Life stage", y = "Mean number of individuals")
 ```
 
+Need to get SEs in there somehow... 
+
+```{r}
+graphdata <- data %>%
+  rename(emerged = num.w.emerg.tot) %>%
+  rename(cocoons = num.w.coc) %>%
+  rename(eclosed = num.w.eclos.tot)
+
+graphdata <- graphdata %>%
+  select(ID, food, emerged, cocoons, eclosed)
+
+graphdatalong <- gather(graphdata, stage, number, emerged:eclosed)
+graphdatalong$stage <- ordered(graphdatalong$stage, levels = c("emerged", "cocoons", "eclosed"))
+```
+
+
+
+ggplot(aes(x = stage, y = number, color = food), data = graphdatalong) + 
+  geom_point(aes(alpha = 0.5)) + 
+  geom_point(data = meanslong, aes(x = stage, y = number, color = food, size = 3)) + 
+  geom_line(data = meanslong, aes(group = food)) + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  labs(x = "Life stage", y = "Number of individuals") 
+
+
+Get SE values: 
+
+```{r}
+ses <- summarySE(graphdatalong, measurevar = "number",
+                  groupvars = c("food", "stage"),
+                  na.rm=TRUE)
+```
+
+```{r}
+ggplot(aes(x = stage, y = number, color = food), data = ses) + 
+  geom_point(aes(size = 3)) + 
+  geom_line(aes(group = food)) + 
+  ylim(0, 120) + 
+  geom_errorbar(aes(ymin = number - se, ymax = number + se),
+                width = .1, size = .5) +
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  labs(x = "Life stage", y = "Mean number of individuals")
+```
+
+So this just doesn't match with my previous results... I think what's happening is that the binomial framework is analyzing from the difference between emerged and eclosed, not the raw eclosed values. Diet has the lowest dip between emerged and eclosed, meaning not that more diet survived in raw numbers, but that a higher proportion of diet survived. 
