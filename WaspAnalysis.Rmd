@@ -24,6 +24,7 @@ library(tidyr)
 library(Rmisc)
 library(lmerTest)
 library(nlme)
+library(forecats)
 ```
 
 ```{r}
@@ -184,5 +185,29 @@ ggplot(aes(x = surv.to.eclos, y = mass.5th, color = food), data = data) +
   labs(x = "Percent wasps survived to eclosion", y = "Mass at 5th instar")
 ```
 
+New graph that Joel wanted: 
 
+Make means for each stage
+
+```{r}
+means <- data %>%
+  group_by(food) %>%
+    summarise(emerged = mean(num.w.emerg.tot), cocoons = mean(num.w.coc), 
+              eclosed = mean(num.w.eclos.tot))
+
+meanslong <- gather(means, stage, number, emerged:eclosed)
+
+meanslong$stage <- ordered(meanslong$stage, levels = c("emerged", "cocoons", "eclosed"))
+```
+
+```{r}
+ggplot(aes(x = stage, y = number, color = food), data = meanslong) + 
+  geom_point() + 
+  geom_line(aes(group = food)) + 
+  ylim(0, 110) + 
+  scale_color_manual(values=c("#95D840", "#3F87BC", "#440D54"),
+                     name="Food Type",
+                     label=c("Devil's Claw", "Diet", "Tobacco")) + 
+  labs(x = "Life stage", y = "Mean number of individuals")
+```
 
