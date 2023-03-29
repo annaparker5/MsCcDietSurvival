@@ -1,0 +1,28 @@
+﻿Column,Explanation,Format,Units
+ID,Unique ID for each caterpillar,###,N/A
+food,Identifier for the type of food consumed by the caterpillar,Factor,"TB, DC"
+para,parasitization status,Factor,yes/no
+bin,"Identifier of the bin in which the caterpillar was housed (diet were in individual dishes, hence ""0"")",Character,A-Z
+date.hatch,Date the caterpillar hatched ,MM/DD/YYYY,N/A
+mass.hatch,Mass at hatching (for future analyses - set to 1 mg),Numeric,mg
+date.3rd,Date the caterpillar molted to 3rd instar*,MM/DD/YYYY,N/A
+mass.3rd,Mass at 3rd instar,Numeric,mg
+date.para,Date the caterpillar was parasitized (if applicable),MM/DD/YYYY,N/A
+num.para,Number of times the caterpillar was parasitized,Numeric,N/A
+,THEN FOLLOW A LONG SERIES OF CONGRUENT COLUMNS:,,
+date.XXX,"Date at particular development stage (instar, wandering, pupation, eclosion, wasp emergence, etc)",MM/DD/YYYY,N/A
+mass.XXX,"Mass at that particular development stage (instar, wandering, pupation, eclosion, wasp emergence, etc)",Numeric,mg
+,IMPORTANT ONES TO HIGHLIGHT:,,
+sex,Sex of the adult moth,Factor,M/F
+date.coc,Date of wasp cocoon appearance,MM/DD/YYYY,N/A
+date.remove,Date of wasp cocoon removal,MM/DD/YYYY,N/A
+wet,Whether the cup was wet with hemolymph or not,Factor,yes/no
+num.w.larvae,Number of wasp larvae outside of the caterpillar but not within a cocoon,Numeric,N/A
+num.w.coc,Number of wasp cocoons,Numeric,N/A
+date.w.eclos,Date of wasp eclosion,MM/DD/YYYY,N/A
+,ONLY SEXED/MASSED WASPS FOR 1 ID,,
+date.mass.frozen,Date the parasitized caterpillar was removed from freezer and massed,MM/DD/YYYY,N/A
+mass.frozen,Mass of the frozen caterpillar (still frozen),Numeric,mg
+date.death,Date the caterpillar died (if premature) ,MM/DD/YYYY,N/A
+survived,Whether the caterpillar survived the whole experiment,Factor,yes/no
+Notes,Any comments about the individual,Character,N/A
