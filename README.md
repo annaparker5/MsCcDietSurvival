@@ -4,8 +4,8 @@ Experiment conducted Spring 2020, tracking Cotesia congregata survival on Manduc
 This dataset was not used as a part of any publication; as such, the analyses are incomplete and not super thorough. However, its results regarding wasp success concur with my findings published in Ch. 2 (Leaf Scanner project). 
 
 Data: 
-- MsCcSurvDec31FINAL.csv: the final dataset containing all developmental data
-- README_Dec31FINAL.csv: a README explaining all of the columns in the final dataset 
+- MsCcSurvDec31Final.csv: the final dataset containing all developmental data
+- README_Dec31Final.csv: a README explaining all of the columns in the final dataset 
 
 Code: 
 - PrelimCleaningAnalyses.Rmd: a compilation of data cleaning, graphs, and stats to explore my findings. Focuses on caterpillar success. Well annotated. 
