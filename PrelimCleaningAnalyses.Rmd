@@ -42,7 +42,7 @@ library(nlme)
 ```
 
 ```{r}
-data <- read.csv("~/Desktop/MsCcSurvJun22.csv", header = TRUE)
+data <- read.csv("~/Desktop/GitHub/MsCcDietSurvival/Data/MsCcSurvDec31FINAL.csv", header = TRUE)
 ```
 
 ## 1. Clean the data

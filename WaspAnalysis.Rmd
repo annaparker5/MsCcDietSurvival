@@ -27,7 +27,7 @@ library(nlme)
 ```
 
 ```{r}
-data <- read.csv("~/Desktop/MsCcSurvNov8.csv", header = TRUE)
+data <- read.csv("~/Desktop/GitHub/MsCcDietSurvival/Data/MsCcSurvDec31FINAL.csv", header = TRUE)
 ```
 
 
